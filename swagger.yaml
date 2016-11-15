@@ -563,4 +563,3 @@ definitions:
         description: The internal reference for this specific competitor
       name:
         type: string
-        description: The name of the animal
