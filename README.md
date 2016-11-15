@@ -4,7 +4,7 @@
 
 Visit this link and click 'default' to view the API documentation.
 
-http://petstore.swagger.io/?url=https://raw.githubusercontent.com/edbettech/data-services/master/swagger.json#/
+http://petstore.swagger.io/?url=https://raw.githubusercontent.com/edbettech/data-services/master/swagger.json#/default
 
 ## Overview
 
