@@ -353,12 +353,14 @@
                     "type": "object",
                     "properties": {
                         "prices": {
-                            "type": "object",
-                            "description": "An array containing prices for each competitor. Array is given in betting interest order, index 0 being betting interest number 1 and so forth."
+                            "type": "array",
+                            "items": {
+                                "type": "float"
+                            }
                         },
                         "total": {
-                            "type": "integer",
-                            "description": "The pool total in full fractional units of currency as per the 'currency' attribute."
+                            "description": "The pool total in full/ fractional units of currency as per the 'currency' attribute.",
+                            "type": "float"
                         }
                     }
                 }
@@ -522,6 +524,37 @@
                         "SUSPENDED",
                         "INTERIM"
                     ]
+                },
+                "tote_pools": {
+                    "type": "object",
+                    "description": "Lists available pools for all tote providers",
+                    "properties": {
+                        "host": {
+                            "type": "array",
+                            "description": "Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_qld": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_nsw": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_vic": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -553,6 +586,37 @@
                         "SUSPENDED",
                         "INTERIM"
                     ]
+                },
+                "tote_pools": {
+                    "type": "object",
+                    "description": "Lists available pools for all tote providers",
+                    "properties": {
+                        "host": {
+                            "type": "array",
+                            "description": "Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_qld": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_nsw": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_vic": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 },
                 "race_info": {
                     "type": "object",
