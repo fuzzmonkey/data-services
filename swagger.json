@@ -1,0 +1,701 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "PRE RELEASE",
+        "title": "Data Services API",
+        "description": "API for race meeting data retrieval including market data and results."
+    },
+    "basePath": "/api",
+    "host": "edbet.com",
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "securityDefinitions": {
+        "api_key": {
+            "type": "apiKey",
+            "name": "api_key",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "api_key": []
+        }
+    ],
+    "paths": {
+        "/meetings": {
+            "get": {
+                "description": "Returns an array of `Meeting` objects for the supplied meeting date. If no meeting date is supplied it will default to the current date in UTC time. The meeting object includes information about it's events and in turn the competitors.\n",
+                "parameters": [
+                    {
+                        "name": "meeting_date",
+                        "type": "string",
+                        "format": "YYYY-MM-DD",
+                        "description": "Meeting date to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "venue_type",
+                        "type": "string",
+                        "enum": [
+                            "THOROUGHBRED",
+                            "HARNESS",
+                            "GREYHOUND"
+                        ],
+                        "description": "Type of meeting to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "country_name",
+                        "type": "string",
+                        "description": "Name of country to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "country_alpha_3",
+                        "type": "string",
+                        "description": "Alpha 2 code of country to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "country_alpha_2",
+                        "type": "string",
+                        "description": "Alpha 3 code of country to filter response by",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "title": "MeetingsResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "meetings": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/Meeting"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/meetings/{id}": {
+            "get": {
+                "description": "Returns a specifc meeting including it's events and associated competitors.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "description": "id of meeting",
+                        "type": "integer",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "title": "MeetingResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "meeting": {
+                                            "$ref": "#/definitions/FullMeeting"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/meetings/{id}/events/{event_id}/markets": {
+            "get": {
+                "description": "Returns available market data including pool sizes and prices for a given event.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "description": "id of meeting",
+                        "type": "integer",
+                        "in": "path"
+                    },
+                    {
+                        "name": "event_id",
+                        "required": true,
+                        "description": "id of event",
+                        "in": "path",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "title": "MarketsResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "markets": {
+                                            "type": "object",
+                                            "description": "Assocative array (map) of market providers and their associated markets. e.g tab_vic, tab_nsw, tab_qld, host.",
+                                            "properties": {
+                                                "host": {
+                                                    "type": "object",
+                                                    "description": "Assocative array (map) of market names and market data. See `SingleLegToteMarket` and `MultiLegToteMarket` for information on data structure."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/meetings/{id}/events/{event_id}/results": {
+            "get": {
+                "description": "Returns available result data including finish positions and payouts for a given event.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "description": "id of meeting",
+                        "type": "integer",
+                        "in": "path"
+                    },
+                    {
+                        "name": "event_id",
+                        "required": true,
+                        "description": "id of event",
+                        "type": "integer",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "title": "ResultsResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "markets": {
+                                            "type": "object",
+                                            "description": "Assocative array (map) of market providers and their associated results. e.g tab_vic, tab_nsw, tab_qld, host.",
+                                            "properties": {
+                                                "host": {
+                                                    "type": "object",
+                                                    "description": "Assocative array (map) of market names and results. See `ToteResultMarket` for information on data structure."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ErrorResponse": {
+            "title": "Error Response",
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "FAILED"
+                    ]
+                },
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string"
+                        },
+                        "code": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "SingleLegToteMarket": {
+            "type": "object",
+            "description": "A representation of a market that has only one leg. \n\nTote: WIN, PLC, SHW, EW\n",
+            "properties": {
+                "currency": {
+                    "type": "string",
+                    "description": "The currency the market data is given in"
+                },
+                "market": {
+                    "type": "object",
+                    "properties": {
+                        "prices": {
+                            "type": "object",
+                            "description": "An array containing prices for each competitor. Array is given in betting interest order, index 0 being betting interest number 1 and so forth."
+                        },
+                        "total": {
+                            "type": "integer",
+                            "description": "The pool total in full fractional units of currency as per the 'currency' attribute."
+                        }
+                    }
+                }
+            }
+        },
+        "MutliLegToteMarket": {
+            "type": "object",
+            "description": "A representation of a market that has multiple legs. This could be multiple legs on a single event, e.g an Exacta pool or a multiple legs over many events e.g a Pick 6. \n\nTote: EXA,QNL,QNP,TRI,TRO,SFC,FS4, PK1-9, P10-16, GSL, JPT, QPT\n",
+            "properties": {
+                "currency": {
+                    "type": "string",
+                    "description": "The currency the market data is given in"
+                },
+                "market": {
+                    "type": "object",
+                    "properties": {
+                        "prices": {
+                            "type": "object",
+                            "description": "An associative array containing key value maps of combinations and their prices. e.g { \"1\" => {\"2\" => 2.4, \"3\" => 4.0, \"4\" => 150.0} }"
+                        },
+                        "total": {
+                            "description": "The pool total in units of currency as per the 'currency' attribute.",
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "ToteResultMarket": {
+            "type": "object",
+            "description": "A representation of results for a given market. The key inside the market name is the betting interest number of the finisher. \nFor exotic pools the key will contain multiple runners seperated by slashes e.g 1/4/6/3\n\n\"PLC\": {\n    \"1\": {\n        \"payout\": 11\n    },\n    \"3\": {\n        \"payout\": 7.4\n    }\n},\n\n\"SFC\": {\n    \"3/1/6/2\": {\n        \"finish_position\": 0,\n        \"payout\": 392.2\n    }\n},\n"
+        },
+        "Venue": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this venue"
+                },
+                "venue_type": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "internal reference for this country"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "alpha_2_code": {
+                            "type": "string"
+                        },
+                        "alpha_3_code": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "FullMeeting": {
+            "type": "object",
+            "properties": {
+                "venue": {
+                    "$ref": "#/definitions/Venue"
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this meeting"
+                },
+                "meeting_date": {
+                    "type": "string",
+                    "format": "YYYY-MM-DD"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED"
+                    ]
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FullEvent"
+                    }
+                }
+            }
+        },
+        "Meeting": {
+            "type": "object",
+            "properties": {
+                "venue": {
+                    "$ref": "#/definitions/Venue"
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this meeting"
+                },
+                "meeting_date": {
+                    "type": "string",
+                    "format": "YYYY-MM-DD"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED"
+                    ]
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Event"
+                    }
+                }
+            }
+        },
+        "Event": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this event"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "integer",
+                    "description": "UNIX Timestamp"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED",
+                        "FINAL",
+                        "ABANDONED",
+                        "PROTEST",
+                        "SUSPENDED",
+                        "INTERIM"
+                    ]
+                }
+            }
+        },
+        "FullEvent": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this event"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "integer",
+                    "description": "UNIX Timestamp"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED",
+                        "FINAL",
+                        "ABANDONED",
+                        "PROTEST",
+                        "SUSPENDED",
+                        "INTERIM"
+                    ]
+                },
+                "race_info": {
+                    "type": "object",
+                    "properties": {
+                        "distance": {
+                            "type": "integer"
+                        },
+                        "distance_unit": {
+                            "type": "string",
+                            "enum": [
+                                "meters"
+                            ]
+                        },
+                        "prize_money": {
+                            "type": "integer"
+                        },
+                        "prize_money_currency": {
+                            "type": "string"
+                        },
+                        "weather_description": {
+                            "type": "string"
+                        },
+                        "race_class": {
+                            "type": "string"
+                        },
+                        "rail_position": {
+                            "type": "string"
+                        },
+                        "track_type": {
+                            "type": "string"
+                        },
+                        "track_layout": {
+                            "type": "string"
+                        },
+                        "track_condition": {
+                            "type": "string"
+                        },
+                        "course_direction": {
+                            "type": "string",
+                            "description": "Indicates whether the event is running clockwise or anti-clockwise",
+                            "enum": [
+                                "clockwise",
+                                "anticlockwise"
+                            ]
+                        }
+                    }
+                },
+                "event_competitors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/EventCompetitor"
+                    }
+                }
+            }
+        },
+        "EventCompetitor": {
+            "type": "object",
+            "description": "An event competitor is an instance of a 'Competitor' in a given event. The data associated with an animal, e.g it's name is stored in the 'Competitor' object.",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Internal reference for this event competitor"
+                },
+                "program_number": {
+                    "type": "string",
+                    "description": "Otherwise known as 'cloth number'. The number of the competitor displayed on the race program. For example in teritories coupled runners are possible, this field might contain 1A, 1B, 2A, 2B etc."
+                },
+                "betting_interest_number": {
+                    "type": "integer",
+                    "description": "The betting interest number of this competitor, usually the same as the program / cloth number except in the case of coupled runners."
+                },
+                "barrier_number": {
+                    "type": "integer",
+                    "description": "The barrier or box number of the competitor"
+                },
+                "scratched": {
+                    "type": "boolean",
+                    "description": "Whether the competitor has been scratched from the race or not"
+                },
+                "jockey": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "Internal reference for this jockey"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "trainer": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "Internal reference for this trainer"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "silk_uri": {
+                    "type": "string",
+                    "description": "The URI for the silk image, if available."
+                },
+                "finish_position": {
+                    "type": "integer",
+                    "description": "The competitor's finish position in the race, available once the race is FINAL"
+                },
+                "gear": {
+                    "type": "string"
+                },
+                "handicap_weight": {
+                    "type": "integer"
+                },
+                "handicap_weight_unit": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "integer"
+                },
+                "weight_unit": {
+                    "type": "string"
+                },
+                "competitor": {
+                    "$ref": "#/definitions/Competitor"
+                }
+            }
+        },
+        "Competitor": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "The internal reference for this specific competitor"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the animal"
+                }
+            }
+        }
+    }
+}
