@@ -16,7 +16,7 @@ Returns an array of meetings for a given date with each meeting including data d
 
 Meetings are created throughout the day so it's important to poll this endpoint frequently.
 
-### /meetings/id
+### /meetings/{id}
 
 Returns a meeting level detail for a given meeting including data down to the competitor level.
 
