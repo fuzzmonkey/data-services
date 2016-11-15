@@ -398,7 +398,28 @@ definitions:
           - ABANDONED
           - PROTEST
           - SUSPENDED
-          - INTERIM   
+          - INTERIM
+      tote_pools:
+        type: object
+        description: Lists available pools for all tote providers
+        properties:
+          host:
+            type: array
+            description: Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.
+            items:
+              type: string
+          tab_qld:
+            type: array
+            items:
+              type: string
+          tab_nsw:
+            type: array
+            items:
+              type: string
+          tab_vic:
+            type: array
+            items:
+              type: string
 
   FullEvent:
     type: object
@@ -423,6 +444,27 @@ definitions:
           - PROTEST
           - SUSPENDED
           - INTERIM
+      tote_pools:
+        type: object
+        description: Lists available pools for all tote providers
+        properties:
+          host:
+            type: array
+            description: Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.
+            items:
+              type: string
+          tab_qld:
+            type: array
+            items:
+              type: string
+          tab_nsw:
+            type: array
+            items:
+              type: string
+          tab_vic:
+            type: array
+            items:
+              type: string
       race_info:
         type: object
         properties:
