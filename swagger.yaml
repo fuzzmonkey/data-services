@@ -256,10 +256,10 @@ definitions:
           prices:
             type: array
             items:
-              type: float 
+              type: integer 
           total:
             description: The pool total in full/ fractional units of currency as per the 'currency' attribute.
-            type: float
+            type: integer
 
   MutliLegToteMarket:
     type: object
@@ -563,4 +563,4 @@ definitions:
         description: The internal reference for this specific competitor
       name:
         type: string
-        desciption: The name of the animal
+        description: The name of the animal
