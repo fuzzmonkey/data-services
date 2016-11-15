@@ -2,7 +2,7 @@
 
 ## API Documentation
 
-Visit this link and click 'default' to view the API documentation.
+API Documentation is written using the swagger toolkit and can be viewed here:
 
 http://petstore.swagger.io/?url=https://raw.githubusercontent.com/edbettech/data-services/master/swagger.json#/default
 
