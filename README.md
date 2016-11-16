@@ -30,7 +30,7 @@ Returns results including finish positions and payouts for a given event in a me
 
 ## Push API Overview
 
-A push notifcation system can be configured to send updates to your server as data changes throughout the racing day. This updates include:
+A push notifcation system can be configured to send updates to your server as data changes throughout the racing day. These updates can include:
 
 * New Meetings
 * Event status changes (e.g OPEN > CLOSED > INTERIM > FINAL)
