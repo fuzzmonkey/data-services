@@ -37,6 +37,53 @@ paths:
       responses:
         default:
           description: Payloads are pushed via HTTP
+  /MEETING:
+    post:
+      responses:
+       default:
+         description: The schema for the MEETING notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of MEETING
+         schema:
+           $ref: '#/definitions/Meeting'
+
+  /EVENT:
+    post:
+      responses:
+       default:
+         description: The schema for the EVENT notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of EVENT
+         schema:
+           $ref: '#/definitions/Event'
+
+  /EVENT_COMPETITOR:
+    post:
+      responses:
+       default:
+         description: The schema for the EVENT_COMPETITOR notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of EVENT_COMPETITOR
+         schema:
+           $ref: '#/definitions/EventCompetitor'
+
+  /MARKET_SINGLE_LEG:
+    post:
+      responses:
+       default:
+         description: The schema for the single leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of MARKET
+         schema:
+           $ref: '#/definitions/SingleLegToteMarket'
+
+  /MARKET_MULTI_LEG:
+    post:
+      responses:
+       default:
+         description: The schema for the multi leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of MARKET
+         schema:
+           $ref: '#/definitions/MutliLegToteMarket'
+
+  /RESULTS:
+    post:
+      responses:
+       default:
+         description: The schema for the RESULTS notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of RESULTS
+         schema:
+           $ref: '#/definitions/ToteResultMarket'
 
 definitions:
   Meeting:
@@ -72,6 +119,7 @@ definitions:
                 type: string
               alpha_3_code: 
                 type: string
+
   Event:
     type: object
     properties:
@@ -264,5 +312,3 @@ definitions:
         type: integer
       provider_name:
         type: string
-
-  
