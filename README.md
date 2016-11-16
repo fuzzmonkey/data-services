@@ -4,7 +4,13 @@
 
 API Documentation is written using the swagger toolkit and can be viewed here:
 
+### Pull
+
 http://petstore.swagger.io/?url=https://raw.githubusercontent.com/edbettech/data-services/master/swagger.json#/default
+
+### Push
+
+http://petstore.swagger.io/?url=https://raw.githubusercontent.com/edbettech/data-services/master/swagger_push.json#/default
 
 ## Pull API Overview
 
@@ -38,3 +44,5 @@ A push notifcation system can be configured to send updates to your server as da
 * Market changes (e.g latest tote prices, pool totals)
 * Competitor Finish positions
 * Market payouts (e.g tote pool results + payouts)
+
+The push API documentation gives more details on the types of notifications available as well as their contents.
