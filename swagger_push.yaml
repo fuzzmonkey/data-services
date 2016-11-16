@@ -1,0 +1,268 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Data Services Push API
+  description: |
+    API for push notifications for racing related data. Notifcations are sent from the Ed Bet Tech server to the client server via HTTP Post. The type of notication is contained in the 'NotificationType' HTTP header.
+  
+    ** Notification Types **
+  
+    | NotificationType | Object Type | Description |
+    | -----------------|-------------|-------------|
+    | MEETING | Meeting | Sent when a new meeting is created in the system
+    | EVENT | Event | Sent when an event start time changes, status changes, available pools change or when finish positions are available |
+    | EVENT_COMPETITOR | EventCompetitor | Sent when a competitor is scratched from an event or competitor details change |
+    | MARKET | SingleLegToteMarket or MultiLegToteMarket | Sent when market data changes, e.g prices or pool total is updated |
+    | RESULTS | ToteResultMarket | Sent when payouts become available for a given event / provider |
+  
+  version: "PRE RELEASE"
+
+paths:
+  /:
+    post:
+      description: This is a HTTP push protocol, HTTP payloads are sent to a client HTTP server.
+      parameters:
+        - name: NotificationType
+          in: header
+          description: The type of update being sent. 
+          required: true
+          type: string
+          enum:
+            - MEETING
+            - EVENT
+            - EVENT_COMPETITOR
+            - MARKET
+            - RESULTS
+      responses:
+        default:
+          description: Payloads are pushed via HTTP
+
+definitions:
+  Meeting:
+    type: object
+    properties:
+      id: 
+        type: integer
+      meeting_date:
+        type: string
+        format: "YYYY-MM-DD"
+      status:
+        type: string
+        enum:
+          - OPEN
+          - CLOSED
+      name:
+        type: string
+      venue:
+        type: object
+        properties:
+          id: 
+            type: integer
+          venue_type: 
+            type: string
+          country:
+            type: object
+            properties:
+              id:
+                type: integer
+              name: 
+                type: string
+              alpha_2_code: 
+                type: string
+              alpha_3_code: 
+                type: string
+  Event:
+    type: object
+    properties:
+      meeting_id:
+        type: integer
+      id:
+        type: integer
+      number:
+        type: integer
+      status:
+        type: string
+        enum:
+          - OPEN
+          - CLOSED
+          - FINAL
+          - ABANDONED
+          - PROTEST
+          - SUSPENDED
+          - INTERIM
+      start_time:
+        type: integer
+        description: UNIX Timestamp
+      tote_pools:
+        type: object
+        description: Lists available pools for all tote providers
+        properties:
+          host:
+            type: array
+            description: Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.
+            items:
+              type: string
+          tab_qld:
+            type: array
+            items:
+              type: string
+          tab_nsw:
+            type: array
+            items:
+              type: string
+          tab_vic:
+            type: array
+            items:
+              type: string
+      finishers:
+        type: object
+        description: Only provided when the event status is FINAL. The key of the EventCompetitor is the finish position.
+        properties:
+          1:
+            type: object
+            description: To handle dead heats, a given finish position may have multiple event competitor objects inside the array
+            properties:
+              event_competitors:
+                type: array
+                items:
+                  $ref: '#/definitions/EventCompetitor'
+          2:
+            type: object
+            description: To handle dead heats, a given finish position may have multiple event competitor objects inside the array
+            properties:
+              event_competitors:
+                type: array
+                items:
+                  $ref: '#/definitions/EventCompetitor'
+          3:
+            type: object
+            description: To handle dead heats, a given finish position may have multiple event competitor objects inside the array
+            properties:
+              event_competitors:
+                type: array
+                items:
+                  $ref: '#/definitions/EventCompetitor'
+          4:
+            type: object
+            description: To handle dead heats, a given finish position may have multiple event competitor objects inside the array
+            properties:
+              event_competitors:
+                type: array
+                items:
+                  $ref: '#/definitions/EventCompetitor'
+
+  EventCompetitor:
+    type: object
+    properties:
+      event_competitor_id:
+        type: integer
+      betting_interest_number:
+        type: integer
+      program_number:
+        type: string
+      barrier_number:
+        type: integer
+      scratched:
+        type: boolean
+      competitor:
+        type: object
+        properties:
+          name:
+            type: string
+          id:
+            type: integer
+
+  SingleLegToteMarket:
+    type: object
+    description: |
+      A representation of a market that has only one leg. 
+
+      Tote: WIN, PLC, SHW, EW
+    properties:
+      meeting_id:
+        type: integer
+      event_id:
+        type: integer
+      event_number:
+        type: integer
+      provider_name:
+        type: string
+      currency:
+        type: string
+        description: The currency the market data is given in
+      market:
+        type: object
+        properties:
+          prices:
+            type: array
+            items:
+              type: integer 
+          total:
+            description: The pool total in full/ fractional units of currency as per the 'currency' attribute.
+            type: integer
+
+  MutliLegToteMarket:
+    type: object
+    description: |
+      "A representation of a market that has multiple legs. This could be multiple legs on a single event, e.g an Exacta pool or a multiple legs over many events e.g a Pick 6. Tote: EXA,QNL,QNP,TRI,TRO,SFC,FS4, PK1-9, P10-16, GSL, JPT, QPT"
+        Multi leg pools will be given on the first race
+    properties:
+      meeting_id:
+        type: integer
+      event_id:
+        type: integer
+      event_number:
+        type: integer
+      provider_name:
+        type: string
+      currency:
+        type: string
+        description: The currency the market data is given i
+      legs:
+        description: The races this multi leg pool appears in
+        type: array
+        items:
+          type: integer
+      market:
+        type: object
+        properties:
+          prices:
+            type: object
+            description: 'An associative array containing key value maps of combinations and their prices. e.g { "1" => {"2" => 2.4, "3" => 4.0, "4" => 150.0} }'
+          total:
+            description: The pool total in units of currency as per the 'currency' attribute.
+            type: integer
+
+  ToteResultMarket:
+    type: object
+    description: |
+      A representation of results for a given market. The key inside the market name is the betting interest number of the finisher. 
+      For exotic pools the key will contain multiple runners seperated by slashes e.g 1/4/6/3
+
+      "PLC": {
+          "1": {
+              "payout": 11
+          },
+          "3": {
+              "payout": 7.4
+          }
+      },
+
+      "SFC": {
+          "3/1/6/2": {
+              "finish_position": 0,
+              "payout": 392.2
+          }
+      },
+    properties:
+      meeting_id:
+        type: integer
+      event_id:
+        type: integer
+      event_number:
+        type: integer
+      provider_name:
+        type: string
+
+  
