@@ -172,7 +172,7 @@
                 }
             }
         },
-        "/meetings/{id}/events/{event_id}/markets": {
+        "/meetings/{id}/events/{event_number}/markets": {
             "get": {
                 "description": "Returns available market data including pool sizes and prices for a given event.\n",
                 "parameters": [
@@ -184,9 +184,9 @@
                         "in": "path"
                     },
                     {
-                        "name": "event_id",
+                        "name": "event_number",
                         "required": true,
-                        "description": "id of event",
+                        "description": "event/race number of event",
                         "in": "path",
                         "type": "integer"
                     }
@@ -244,7 +244,7 @@
                 }
             }
         },
-        "/meetings/{id}/events/{event_id}/results": {
+        "/meetings/{id}/events/{event_number}/results": {
             "get": {
                 "description": "Returns available result data including finish positions and payouts for a given event.\n",
                 "parameters": [
@@ -258,7 +258,7 @@
                     {
                         "name": "event_id",
                         "required": true,
-                        "description": "id of event",
+                        "description": "event/race number of event",
                         "type": "integer",
                         "in": "path"
                     }
