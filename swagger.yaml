@@ -123,7 +123,7 @@ paths:
           schema: 
             $ref: '#/definitions/ErrorResponse'
 
-  /meetings/{id}/events/{event_id}/markets:
+  /meetings/{id}/events/{event_number}/markets:
     get:
       description: |
         Returns available market data including pool sizes and prices for a given event.
@@ -133,9 +133,9 @@ paths:
           description: id of meeting
           type: integer
           in: path
-        - name: event_id
+        - name: event_number
           required: true
-          description: id of event
+          description: race/event number of event
           in: path
           type: integer
       responses:
@@ -173,7 +173,7 @@ paths:
           schema: 
             $ref: '#/definitions/ErrorResponse'
         
-  /meetings/{id}/events/{event_id}/results:
+  /meetings/{id}/events/{event_number}/results:
     get:
       description: |
         Returns available result data including finish positions and payouts for a given event.
@@ -183,9 +183,9 @@ paths:
           description: id of meeting
           type: integer
           in: path
-        - name: event_id
+        - name: event_number
           required: true
-          description: id of event
+          description: race/event number of event
           type: integer
           in: path
       responses:
