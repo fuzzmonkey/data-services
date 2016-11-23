@@ -3,8 +3,59 @@ swagger: '2.0'
 info:
   version: "PRE RELEASE"
   title: Data Services API
-  description: >-
+  description: |
     API for race meeting data retrieval including market data and results.
+    
+    # Market Codes
+    
+    The payout rules for each market vary depending on teritory listed below are generic codes.
+    
+    ## Single Leg Markets
+
+    | Code | Name | Description |
+    | ---- | ---- | ----------- |
+    | WIN  | Win  | Competitor to finish first in the race |
+    | PLC  | Place | Competitor to finish first, second or third in the race  |
+    | WP   | Win Place | Combined Win and Place bet |
+    | SHW  | Show | Competitor to finish first, second and third in the race  |
+    | WIN FX | Fixed Odds Win | Competitor to finish first in the race offered at fixed payout price from a book maker |
+    | PLC FX | Fixed Odds Place | Competitor to finish first, second or third in the race offered at a fixed payout price from a book maker |
+
+    ## Multi leg, single race markets
+
+    | Code | Name | Description |
+    | ---- | ---- | ----------- |
+    | EXA  | Exacta | Competitors to finish first and second in correct order |
+    | QNL  | Quinella | Competitors to finish first and second in any order |
+    | QNP  | Quinella Place | Competitors to finish first, second or third in any order |
+    | TRI  | Trifecta / HKG Tierce | Competitors to finish first, second and third in correct order |
+    | TRO  | Trio | Competitors to finish first, second and third in any order |
+    | FS4 (HKG) | First 4 | Competitors to finish first, second, third and fourth in any order |
+    | SFC  | Superfecta / AUS First 4 / HKG Quartet| Competitors to finish first, second, third and fourth in correct order |
+    | PEN  | Pentafecta / Super Hi-5 | Competitors to finish first, second, third, fourth and fifth in correct order |
+    | QN5 (FRA) | Pick 5 | Pick the first five horses any order | 
+    | QRT (FRA) | Quarte | Pick the first four horses, in order/any order |
+    | QTP (FRA) | Quinte+ | Pick the first five horses, in order/any order  | 
+    | MLT (FRA) | Multi | Pick the first 4 horses in any order with a selection of 4 to 7 horses |
+    | MML (FRA) |  Mini Multi | Pick the first four horses in any order with a selection of 4 to 6 horses |
+    | 2D4 (FRA) | 2 Sur 4 | Pick 2 horses among the first 4 horses |
+    | GSL (USA) | Grand Slam | |
+    | QSF (USA) | Quad Super | |
+    | EX5 | Exact5 | |
+
+    ## Multi leg, multi race markets
+
+    | Code | Name | Description |
+    | ---- | ---- | ----------- |
+    | DBL  | Double | Competitor to finish first across two races |
+    | PPT  | Placepot | Competitors to place across 6 races (GBR,IRL) | 
+    | QPT  | Quadpot | Competitors to place across 4 races (GBR) |
+    | JP6  | Jackpot | Competitor to finish first across six races (GBR) |
+    | JP4  | Jackpot | Competitor to finish first across four races (IRL) |
+    | PK_, P__  | Pick N | Competitor to finish first across N races |
+    | TR2 | Double Trio | 1st, 2nd and 3rd in any order in each of the two nominated races |
+    | TR3 | Triple Trio | 1st, 2nd and 3rd in any order in each of the three nominated races |
+
 basePath: /api
 host: edbet.com
 schemes:
