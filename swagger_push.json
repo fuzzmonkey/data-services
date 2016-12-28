@@ -2,32 +2,28 @@
     "swagger": "2.0",
     "info": {
         "title": "Data Services Push API",
-        "description": "API for push notifications for racing related data. Notifcations are sent from the Ed Bet Tech server to the client server via HTTP Post. The type of notication is contained in the 'NotificationType' HTTP header.\n\n** Notification Types **\n\n| NotificationType | Object Type | Description |\n| -----------------|-------------|-------------|\n| MEETING | Meeting | Sent when a new meeting is created in the system\n| EVENT | Event | Sent when an event start time changes, status changes, available pools change or when finish positions are available |\n| EVENT_COMPETITOR | EventCompetitor | Sent when a competitor is scratched from an event or competitor details change |\n| MARKET | SingleLegToteMarket or MultiLegToteMarket | Sent when market data changes, e.g prices or pool total is updated |\n| RESULTS | ToteResultMarket | Sent when payouts become available for a given event / provider |\n",
+        "description": "API for push notifications for racing related data. Notifcations are sent from the Ed Bet Tech server to the client server via HTTP Post. The type of notication is contained in the 'update_type' attribute in the JSON header attribute.\n\n** Notification Types **\n\n| NotificationType | Object Type | Description |\n| -----------------|-------------|-------------|\n| meeting | Meeting | Sent when a new meeting is created in the system\n| event | Event | Sent when an event start time changes, status changes, available pools change or when finish positions are available |\n| event_competitor | EventCompetitor | Sent when a competitor is scratched from an event or competitor details change |\n| market | SingleLegToteMarket or MultiLegToteMarket | Sent when market data changes, e.g prices or pool total is updated |\n| results | ToteResultMarket | Sent when payouts become available for a given event / provider |\n\nThe JSON body will contain two top level attributes:\n\n* header\n* payload\n\nPayload contains information specific to the update type, header contains information to indentify which event the update applies to.\n\n`\n  {\n     \"header\": {\n         \"country_code\": \"AUS\",\n         \"event_id\": \"34693\",\n         \"event_number\": \"4\",\n         \"meeting_date\": \"2016-12-17\",\n         \"meeting_id\": \"3865\",\n         \"update_type\": \"event\",\n         \"venue_type\": \"THOROUGHBRED\"\n     },\n     \"payload\": {\n         \"finishers\": {},\n         \"start_time\": 1481947920,\n         \"status\": “CLOSED\"\n     }\n  }\n`\n",
         "version": "PRE RELEASE"
     },
     "paths": {
         "/": {
             "post": {
                 "description": "This is a HTTP push protocol, HTTP payloads are sent to a client HTTP server.",
-                "parameters": [
-                    {
-                        "name": "NotificationType",
-                        "in": "header",
-                        "description": "The type of update being sent.",
-                        "required": true,
-                        "type": "string",
-                        "enum": [
-                            "MEETING",
-                            "EVENT",
-                            "EVENT_COMPETITOR",
-                            "MARKET",
-                            "RESULTS"
-                        ]
-                    }
-                ],
                 "responses": {
                     "default": {
                         "description": "Payloads are pushed via HTTP"
+                    }
+                }
+            }
+        },
+        "/header": {
+            "post": {
+                "responses": {
+                    "default": {
+                        "description": "The schema for the header.",
+                        "schema": {
+                            "$ref": "#/definitions/Header"
+                        }
                     }
                 }
             }
@@ -36,7 +32,7 @@
             "post": {
                 "responses": {
                     "default": {
-                        "description": "The schema for the MEETING notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of MEETING",
+                        "description": "The schema for the MEETING notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the header['update_type'] of meeting",
                         "schema": {
                             "$ref": "#/definitions/Meeting"
                         }
@@ -48,7 +44,7 @@
             "post": {
                 "responses": {
                     "default": {
-                        "description": "The schema for the EVENT notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of EVENT",
+                        "description": "The schema for the EVENT notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of event",
                         "schema": {
                             "$ref": "#/definitions/Event"
                         }
@@ -60,7 +56,7 @@
             "post": {
                 "responses": {
                     "default": {
-                        "description": "The schema for the EVENT_COMPETITOR notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of EVENT_COMPETITOR",
+                        "description": "The schema for the EVENT_COMPETITOR notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the header['update_type'] of event_competitor",
                         "schema": {
                             "$ref": "#/definitions/EventCompetitor"
                         }
@@ -72,7 +68,7 @@
             "post": {
                 "responses": {
                     "default": {
-                        "description": "The schema for the single leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of MARKET",
+                        "description": "The schema for the single leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of market",
                         "schema": {
                             "$ref": "#/definitions/SingleLegToteMarket"
                         }
@@ -84,7 +80,7 @@
             "post": {
                 "responses": {
                     "default": {
-                        "description": "The schema for the multi leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of MARKET",
+                        "description": "The schema for the multi leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of market",
                         "schema": {
                             "$ref": "#/definitions/MutliLegToteMarket"
                         }
@@ -96,7 +92,7 @@
             "post": {
                 "responses": {
                     "default": {
-                        "description": "The schema for the RESULTS notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the NotificationType header of RESULTS",
+                        "description": "The schema for the RESULTS notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of results",
                         "schema": {
                             "$ref": "#/definitions/ToteResultMarket"
                         }
@@ -106,10 +102,37 @@
         }
     },
     "definitions": {
+        "Header": {
+            "type": "object",
+            "properties": {
+                "country_code": {
+                    "type": "string"
+                },
+                "event_id": {
+                    "type": "string"
+                },
+                "event_number": {
+                    "type": "string"
+                },
+                "meeting_date": {
+                    "type": "string",
+                    "format": "YYYY-MM-DD"
+                },
+                "meeting_id": {
+                    "type": "string"
+                },
+                "update_type": {
+                    "type": "string"
+                },
+                "venue_type": {
+                    "type": "string"
+                }
+            }
+        },
         "Meeting": {
             "type": "object",
             "properties": {
-                "id": {
+                "meeting_id": {
                     "type": "integer"
                 },
                 "meeting_date": {
@@ -159,15 +182,6 @@
         "Event": {
             "type": "object",
             "properties": {
-                "meeting_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "number": {
-                    "type": "integer"
-                },
                 "status": {
                     "type": "string",
                     "enum": [
@@ -183,37 +197,6 @@
                 "start_time": {
                     "type": "integer",
                     "description": "UNIX Timestamp"
-                },
-                "tote_pools": {
-                    "type": "object",
-                    "description": "Lists available pools for all tote providers",
-                    "properties": {
-                        "host": {
-                            "type": "array",
-                            "description": "Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "tab_qld": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "tab_nsw": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "tab_vic": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
                 },
                 "finishers": {
                     "type": "object",
@@ -283,22 +266,11 @@
                 "program_number": {
                     "type": "string"
                 },
-                "barrier_number": {
+                "finish_position": {
                     "type": "integer"
                 },
                 "scratched": {
                     "type": "boolean"
-                },
-                "competitor": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string"
-                        },
-                        "id": {
-                            "type": "integer"
-                        }
-                    }
                 }
             }
         },
@@ -306,15 +278,6 @@
             "type": "object",
             "description": "A representation of a market that has only one leg. \n\nTote: WIN, PLC, SHW, EW\n",
             "properties": {
-                "meeting_id": {
-                    "type": "integer"
-                },
-                "event_id": {
-                    "type": "integer"
-                },
-                "event_number": {
-                    "type": "integer"
-                },
                 "provider_name": {
                     "type": "string"
                 },
@@ -343,16 +306,7 @@
             "type": "object",
             "description": "\"A representation of a market that has multiple legs. This could be multiple legs on a single event, e.g an Exacta pool or a multiple legs over many events e.g a Pick 6. Tote: EXA,QNL,QNP,TRI,TRO,SFC,FS4, PK1-9, P10-16, GSL, JPT, QPT\"\n  Multi leg pools will be given on the first race\n",
             "properties": {
-                "meeting_id": {
-                    "type": "integer"
-                },
-                "event_id": {
-                    "type": "integer"
-                },
-                "event_number": {
-                    "type": "integer"
-                },
-                "provider_name": {
+                "provider": {
                     "type": "string"
                 },
                 "currency": {
@@ -385,16 +339,7 @@
             "type": "object",
             "description": "A representation of results for a given market. The key inside the market name is the betting interest number of the finisher. \nFor exotic pools the key will contain multiple runners seperated by slashes e.g 1/4/6/3\n\n\"PLC\": {\n    \"1\": {\n        \"payout\": 11\n    },\n    \"3\": {\n        \"payout\": 7.4\n    }\n},\n\n\"SFC\": {\n    \"3/1/6/2\": {\n        \"finish_position\": 0,\n        \"payout\": 392.2\n    }\n},\n",
             "properties": {
-                "meeting_id": {
-                    "type": "integer"
-                },
-                "event_id": {
-                    "type": "integer"
-                },
-                "event_number": {
-                    "type": "integer"
-                },
-                "provider_name": {
+                "provider": {
                     "type": "string"
                 }
             }
