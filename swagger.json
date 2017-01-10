@@ -1,100 +1,316 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Data Services Push API",
-        "description": "API for push notifications for racing related data. Notifcations are sent from the Ed Bet Tech server to the client server via HTTP Post. The type of notication is contained in the 'update_type' attribute in the JSON header attribute.\n\n** Notification Types **\n\n| NotificationType | Object Type | Description |\n| -----------------|-------------|-------------|\n| meeting | Meeting | Sent when a new meeting is created in the system\n| event | Event | Sent when an event start time changes, status changes, available pools change or when finish positions are available |\n| event_competitor | EventCompetitor | Sent when a competitor is scratched from an event or competitor details change |\n| market | SingleLegToteMarket or MultiLegToteMarket | Sent when market data changes, e.g prices or pool total is updated |\n| results | ToteResultMarket | Sent when payouts become available for a given event / provider |\n\nThe JSON body will contain two top level attributes:\n\n* header\n* payload\n\nPayload contains information specific to the update type, header contains information to indentify which event the update applies to.\n\n`\n  {\n     \"header\": {\n         \"country_code\": \"AUS\",\n         \"event_id\": \"34693\",\n         \"event_number\": \"4\",\n         \"meeting_date\": \"2016-12-17\",\n         \"meeting_id\": \"3865\",\n         \"update_type\": \"event\",\n         \"venue_type\": \"THOROUGHBRED\"\n     },\n     \"payload\": {\n         \"finishers\": {},\n         \"start_time\": 1481947920,\n         \"status\": “CLOSED\"\n     }\n  }\n`\n",
-        "version": "PRE RELEASE"
+        "version": "PRE RELEASE",
+        "title": "Data Services API",
+        "description": "API for race meeting data retrieval including market data and results.\n\n# Market Codes\n\nThe payout rules for each market vary depending on teritory listed below are generic codes.\n\n## Single Leg Markets\n\n| Code | Name | Description |\n| ---- | ---- | ----------- |\n| WIN  | Win  | Competitor to finish first in the race |\n| PLC  | Place | Competitor to finish first, second or third in the race  |\n| WP   | Win Place | Combined Win and Place bet |\n| SHW  | Show | Competitor to finish first, second and third in the race  |\n| WIN FX | Fixed Odds Win | Competitor to finish first in the race offered at fixed payout price from a book maker |\n| PLC FX | Fixed Odds Place | Competitor to finish first, second or third in the race offered at a fixed payout price from a book maker |\n\n## Multi leg, single race markets\n\n| Code | Name | Description |\n| ---- | ---- | ----------- |\n| EXA  | Exacta | Competitors to finish first and second in correct order |\n| QNL  | Quinella | Competitors to finish first and second in any order |\n| QNP  | Quinella Place | Competitors to finish first, second or third in any order |\n| TRI  | Trifecta / HKG Tierce | Competitors to finish first, second and third in correct order |\n| TRO  | Trio | Competitors to finish first, second and third in any order |\n| FS4 (HKG) | First 4 | Competitors to finish first, second, third and fourth in any order |\n| SFC  | Superfecta / AUS First 4 / HKG Quartet| Competitors to finish first, second, third and fourth in correct order |\n| PEN  | Pentafecta / Super Hi-5 | Competitors to finish first, second, third, fourth and fifth in correct order |\n| QN5 (FRA) | Pick 5 | Pick the first five horses any order | \n| QRT (FRA) | Quarte | Pick the first four horses, in order/any order |\n| QTP (FRA) | Quinte+ | Pick the first five horses, in order/any order  | \n| MLT (FRA) | Multi | Pick the first 4 horses in any order with a selection of 4 to 7 horses |\n| MML (FRA) |  Mini Multi | Pick the first four horses in any order with a selection of 4 to 6 horses |\n| 2D4 (FRA) | 2 Sur 4 | Pick 2 horses among the first 4 horses |\n| GSL (USA) | Grand Slam | |\n| QSF (USA) | Quad Super | |\n| EX5 | Exact5 | |\n\n## Multi leg, multi race markets\n\n| Code | Name | Description |\n| ---- | ---- | ----------- |\n| DBL  | Double | Competitor to finish first across two races |\n| PPT  | Placepot | Competitors to place across 6 races (GBR,IRL) | \n| QPT  | Quadpot | Competitors to place across 4 races (GBR) |\n| JP6  | Jackpot | Competitor to finish first across six races (GBR) |\n| JP4  | Jackpot | Competitor to finish first across four races (IRL) |\n| PK_, P__  | Pick N | Competitor to finish first across N races |\n| TR2 | Double Trio | 1st, 2nd and 3rd in any order in each of the two nominated races |\n| TR3 | Triple Trio | 1st, 2nd and 3rd in any order in each of the three nominated races |\n"
     },
+    "basePath": "/api",
+    "host": "edbet.com",
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "securityDefinitions": {
+        "api_key": {
+            "type": "apiKey",
+            "name": "api_key",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "api_key": []
+        }
+    ],
     "paths": {
-        "/": {
-            "post": {
-                "description": "This is a HTTP push protocol, HTTP payloads are sent to a client HTTP server.",
-                "responses": {
-                    "default": {
-                        "description": "Payloads are pushed via HTTP"
+        "/meetings": {
+            "get": {
+                "description": "Returns an array of `Meeting` objects for the supplied meeting date. If no meeting date is supplied it will default to the current date in UTC time. The meeting object includes information about it's events and in turn the competitors.\n",
+                "parameters": [
+                    {
+                        "name": "meeting_date",
+                        "type": "string",
+                        "format": "YYYY-MM-DD",
+                        "description": "Meeting date to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "venue_type",
+                        "type": "string",
+                        "enum": [
+                            "THOROUGHBRED",
+                            "HARNESS",
+                            "GREYHOUND"
+                        ],
+                        "description": "Type of meeting to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "country_name",
+                        "type": "string",
+                        "description": "Name of country to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "country_alpha_3",
+                        "type": "string",
+                        "description": "Alpha 2 code of country to filter response by",
+                        "in": "query"
+                    },
+                    {
+                        "name": "country_alpha_2",
+                        "type": "string",
+                        "description": "Alpha 3 code of country to filter response by",
+                        "in": "query"
                     }
-                }
-            }
-        },
-        "/header": {
-            "post": {
+                ],
                 "responses": {
-                    "default": {
-                        "description": "The schema for the header.",
+                    "200": {
+                        "description": "Successful response",
                         "schema": {
-                            "$ref": "#/definitions/Header"
+                            "title": "MeetingsResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "meetings": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/Meeting"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/MEETING": {
-            "post": {
+        "/meetings/{id}": {
+            "get": {
+                "description": "Returns a specifc meeting including it's events and associated competitors.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "description": "id of meeting",
+                        "type": "integer",
+                        "in": "path"
+                    }
+                ],
                 "responses": {
-                    "default": {
-                        "description": "The schema for the MEETING notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the header['update_type'] of meeting",
+                    "200": {
+                        "description": "Successful response",
                         "schema": {
-                            "$ref": "#/definitions/Meeting"
+                            "title": "MeetingResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "meeting": {
+                                            "$ref": "#/definitions/FullMeeting"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/EVENT": {
-            "post": {
+        "/meetings/{id}/events/{event_number}/markets": {
+            "get": {
+                "description": "Returns available market data including pool sizes and prices for a given event.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "description": "id of meeting",
+                        "type": "integer",
+                        "in": "path"
+                    },
+                    {
+                        "name": "event_number",
+                        "required": true,
+                        "description": "race/event number of event",
+                        "in": "path",
+                        "type": "integer"
+                    }
+                ],
                 "responses": {
-                    "default": {
-                        "description": "The schema for the EVENT notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of event",
+                    "200": {
+                        "description": "Successful response",
                         "schema": {
-                            "$ref": "#/definitions/Event"
+                            "title": "MarketsResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "markets": {
+                                            "type": "object",
+                                            "description": "Assocative array (map) of market providers and their associated markets. e.g tab_vic, tab_nsw, tab_qld, host.",
+                                            "properties": {
+                                                "host": {
+                                                    "type": "object",
+                                                    "description": "Assocative array (map) of market names and market data. See `SingleLegToteMarket` and `MultiLegToteMarket` for information on data structure."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/EVENT_COMPETITOR": {
-            "post": {
-                "responses": {
-                    "default": {
-                        "description": "The schema for the EVENT_COMPETITOR notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the header['update_type'] of event_competitor",
-                        "schema": {
-                            "$ref": "#/definitions/EventCompetitor"
-                        }
+        "/meetings/{id}/events/{event_number}/results": {
+            "get": {
+                "description": "Returns available result data including finish positions and payouts for a given event.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "description": "id of meeting",
+                        "type": "integer",
+                        "in": "path"
+                    },
+                    {
+                        "name": "event_number",
+                        "required": true,
+                        "description": "race/event number of event",
+                        "type": "integer",
+                        "in": "path"
                     }
-                }
-            }
-        },
-        "/MARKET_SINGLE_LEG": {
-            "post": {
+                ],
                 "responses": {
-                    "default": {
-                        "description": "The schema for the single leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of market",
+                    "200": {
+                        "description": "Successful response",
                         "schema": {
-                            "$ref": "#/definitions/SingleLegToteMarket"
+                            "title": "ResultsResponse",
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "OK",
+                                        "FAILED"
+                                    ]
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "markets": {
+                                            "type": "object",
+                                            "description": "Assocative array (map) of market providers and their associated results. e.g tab_vic, tab_nsw, tab_qld, host.",
+                                            "properties": {
+                                                "host": {
+                                                    "type": "object",
+                                                    "description": "Assocative array (map) of market names and results. See `ToteResultMarket` for information on data structure."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        },
-        "/MARKET_MULTI_LEG": {
-            "post": {
-                "responses": {
-                    "default": {
-                        "description": "The schema for the multi leg MARKET notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of market",
+                    },
+                    "400": {
+                        "description": "Bad Request, returned if your request was not understood. E.g missing required parameters",
                         "schema": {
-                            "$ref": "#/definitions/MutliLegToteMarket"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
-                    }
-                }
-            }
-        },
-        "/RESULTS": {
-            "post": {
-                "responses": {
-                    "default": {
-                        "description": "The schema for the RESULTS notifcation type. This will be sent as a HTTP POST to your root domain (e.g example.com/) with the  header['update_type'] of results",
+                    },
+                    "401": {
+                        "description": "Not Authorised response, returned if your API key has expired or not authorised",
                         "schema": {
-                            "$ref": "#/definitions/ToteResultMarket"
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error response",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
@@ -102,175 +318,26 @@
         }
     },
     "definitions": {
-        "Header": {
+        "ErrorResponse": {
+            "title": "Error Response",
             "type": "object",
             "properties": {
-                "country_code": {
-                    "type": "string"
-                },
-                "event_id": {
-                    "type": "string"
-                },
-                "event_number": {
-                    "type": "string"
-                },
-                "meeting_date": {
-                    "type": "string",
-                    "format": "YYYY-MM-DD"
-                },
-                "meeting_id": {
-                    "type": "string"
-                },
-                "update_type": {
-                    "type": "string"
-                },
-                "venue_type": {
-                    "type": "string"
-                }
-            }
-        },
-        "Meeting": {
-            "type": "object",
-            "properties": {
-                "meeting_id": {
-                    "type": "integer"
-                },
-                "meeting_date": {
-                    "type": "string",
-                    "format": "YYYY-MM-DD"
-                },
                 "status": {
                     "type": "string",
                     "enum": [
-                        "OPEN",
-                        "CLOSED"
+                        "FAILED"
                     ]
                 },
-                "name": {
-                    "type": "string"
-                },
-                "venue": {
+                "error": {
                     "type": "object",
                     "properties": {
-                        "id": {
-                            "type": "integer"
-                        },
-                        "venue_type": {
+                        "message": {
                             "type": "string"
                         },
-                        "country": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "type": "integer"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "alpha_2_code": {
-                                    "type": "string"
-                                },
-                                "alpha_3_code": {
-                                    "type": "string"
-                                }
-                            }
+                        "code": {
+                            "type": "string"
                         }
                     }
-                }
-            }
-        },
-        "Event": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "OPEN",
-                        "CLOSED",
-                        "FINAL",
-                        "ABANDONED",
-                        "PROTEST",
-                        "SUSPENDED",
-                        "INTERIM"
-                    ]
-                },
-                "start_time": {
-                    "type": "integer",
-                    "description": "UNIX Timestamp"
-                },
-                "finishers": {
-                    "type": "object",
-                    "description": "Only provided when the event status is FINAL. The key of the EventCompetitor is the finish position.",
-                    "properties": {
-                        "1": {
-                            "type": "object",
-                            "description": "To handle dead heats, a given finish position may have multiple event competitor objects inside the array",
-                            "properties": {
-                                "event_competitors": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/EventCompetitor"
-                                    }
-                                }
-                            }
-                        },
-                        "2": {
-                            "type": "object",
-                            "description": "To handle dead heats, a given finish position may have multiple event competitor objects inside the array",
-                            "properties": {
-                                "event_competitors": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/EventCompetitor"
-                                    }
-                                }
-                            }
-                        },
-                        "3": {
-                            "type": "object",
-                            "description": "To handle dead heats, a given finish position may have multiple event competitor objects inside the array",
-                            "properties": {
-                                "event_competitors": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/EventCompetitor"
-                                    }
-                                }
-                            }
-                        },
-                        "4": {
-                            "type": "object",
-                            "description": "To handle dead heats, a given finish position may have multiple event competitor objects inside the array",
-                            "properties": {
-                                "event_competitors": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/EventCompetitor"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "EventCompetitor": {
-            "type": "object",
-            "properties": {
-                "event_competitor_id": {
-                    "type": "integer"
-                },
-                "betting_interest_number": {
-                    "type": "integer"
-                },
-                "program_number": {
-                    "type": "string"
-                },
-                "finish_position": {
-                    "type": "integer"
-                },
-                "scratched": {
-                    "type": "boolean"
                 }
             }
         },
@@ -278,9 +345,6 @@
             "type": "object",
             "description": "A representation of a market that has only one leg. \n\nTote: WIN, PLC, SHW, EW\n",
             "properties": {
-                "provider_name": {
-                    "type": "string"
-                },
                 "currency": {
                     "type": "string",
                     "description": "The currency the market data is given in"
@@ -304,21 +368,11 @@
         },
         "MutliLegToteMarket": {
             "type": "object",
-            "description": "\"A representation of a market that has multiple legs. This could be multiple legs on a single event, e.g an Exacta pool or a multiple legs over many events e.g a Pick 6. Tote: EXA,QNL,QNP,TRI,TRO,SFC,FS4, PK1-9, P10-16, GSL, JPT, QPT\"\n  Multi leg pools will be given on the first race\n",
+            "description": "A representation of a market that has multiple legs. This could be multiple legs on a single event, e.g an Exacta pool or a multiple legs over many events e.g a Pick 6. \n\nTote: EXA,QNL,QNP,TRI,TRO,SFC,FS4, PK1-9, P10-16, GSL, JPT, QPT\n",
             "properties": {
-                "provider": {
-                    "type": "string"
-                },
                 "currency": {
                     "type": "string",
-                    "description": "The currency the market data is given i"
-                },
-                "legs": {
-                    "description": "The races this multi leg pool appears in",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "description": "The currency the market data is given in"
                 },
                 "market": {
                     "type": "object",
@@ -337,9 +391,371 @@
         },
         "ToteResultMarket": {
             "type": "object",
-            "description": "A representation of results for a given market. The key inside the market name is the betting interest number of the finisher. \nFor exotic pools the key will contain multiple runners seperated by slashes e.g 1/4/6/3\n\n\"PLC\": {\n    \"1\": {\n        \"payout\": 11\n    },\n    \"3\": {\n        \"payout\": 7.4\n    }\n},\n\n\"SFC\": {\n    \"3/1/6/2\": {\n        \"finish_position\": 0,\n        \"payout\": 392.2\n    }\n},\n",
+            "description": "A representation of results for a given market. The key inside the market name is the betting interest number of the finisher. \nFor exotic pools the key will contain multiple runners seperated by slashes e.g 1/4/6/3\n\n\"PLC\": {\n    \"1\": {\n        \"payout\": 11\n    },\n    \"3\": {\n        \"payout\": 7.4\n    }\n},\n\n\"SFC\": {\n    \"3/1/6/2\": {\n        \"finish_position\": 0,\n        \"payout\": 392.2\n    }\n},\n"
+        },
+        "Venue": {
+            "type": "object",
             "properties": {
-                "provider": {
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this venue"
+                },
+                "venue_type": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "internal reference for this country"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "alpha_2_code": {
+                            "type": "string"
+                        },
+                        "alpha_3_code": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "FullMeeting": {
+            "type": "object",
+            "properties": {
+                "venue": {
+                    "$ref": "#/definitions/Venue"
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this meeting"
+                },
+                "meeting_date": {
+                    "type": "string",
+                    "format": "YYYY-MM-DD"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED"
+                    ]
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FullEvent"
+                    }
+                }
+            }
+        },
+        "Meeting": {
+            "type": "object",
+            "properties": {
+                "venue": {
+                    "$ref": "#/definitions/Venue"
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this meeting"
+                },
+                "meeting_date": {
+                    "type": "string",
+                    "format": "YYYY-MM-DD"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED"
+                    ]
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Event"
+                    }
+                }
+            }
+        },
+        "Event": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this event"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "integer",
+                    "description": "UNIX Timestamp"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED",
+                        "FINAL",
+                        "ABANDONED",
+                        "PROTEST",
+                        "SUSPENDED",
+                        "INTERIM"
+                    ]
+                },
+                "tote_pools": {
+                    "type": "object",
+                    "description": "Lists available pools for all tote providers",
+                    "properties": {
+                        "host": {
+                            "type": "array",
+                            "description": "Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_qld": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_nsw": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_vic": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "FullEvent": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "internal reference for this event"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "integer",
+                    "description": "UNIX Timestamp"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED",
+                        "FINAL",
+                        "ABANDONED",
+                        "PROTEST",
+                        "SUSPENDED",
+                        "INTERIM"
+                    ]
+                },
+                "tote_pools": {
+                    "type": "object",
+                    "description": "Lists available pools for all tote providers",
+                    "properties": {
+                        "host": {
+                            "type": "array",
+                            "description": "Available pools on what the system defines as the host tote. This value is not set for Australian / New Zealand meetings.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_qld": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_nsw": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "tab_vic": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "race_info": {
+                    "type": "object",
+                    "properties": {
+                        "distance": {
+                            "type": "integer"
+                        },
+                        "distance_unit": {
+                            "type": "string",
+                            "enum": [
+                                "meters"
+                            ]
+                        },
+                        "prize_money": {
+                            "type": "integer"
+                        },
+                        "prize_money_currency": {
+                            "type": "string"
+                        },
+                        "weather_description": {
+                            "type": "string"
+                        },
+                        "race_class": {
+                            "type": "string"
+                        },
+                        "rail_position": {
+                            "type": "string"
+                        },
+                        "track_type": {
+                            "type": "string"
+                        },
+                        "track_layout": {
+                            "type": "string"
+                        },
+                        "track_condition": {
+                            "type": "string"
+                        },
+                        "course_direction": {
+                            "type": "string",
+                            "description": "Indicates whether the event is running clockwise or anti-clockwise",
+                            "enum": [
+                                "clockwise",
+                                "anticlockwise"
+                            ]
+                        }
+                    }
+                },
+                "event_competitors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/EventCompetitor"
+                    }
+                }
+            }
+        },
+        "EventCompetitor": {
+            "type": "object",
+            "description": "An event competitor is an instance of a 'Competitor' in a given event. The data associated with an animal, e.g it's name is stored in the 'Competitor' object.",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Internal reference for this event competitor"
+                },
+                "program_number": {
+                    "type": "string",
+                    "description": "Otherwise known as 'cloth number'. The number of the competitor displayed on the race program. For example in teritories coupled runners are possible, this field might contain 1A, 1B, 2A, 2B etc."
+                },
+                "betting_interest_number": {
+                    "type": "integer",
+                    "description": "The betting interest number of this competitor, usually the same as the program / cloth number except in the case of coupled runners."
+                },
+                "barrier_number": {
+                    "type": "integer",
+                    "description": "The barrier or box number of the competitor"
+                },
+                "scratched": {
+                    "type": "boolean",
+                    "description": "Whether the competitor has been scratched from the race or not"
+                },
+                "jockey": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "Internal reference for this jockey"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "trainer": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "Internal reference for this trainer"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "silk_uri": {
+                    "type": "string",
+                    "description": "The URI for the silk image, if available."
+                },
+                "finish_position": {
+                    "type": "integer",
+                    "description": "The competitor's finish position in the race, available once the race is FINAL"
+                },
+                "gear": {
+                    "type": "string"
+                },
+                "handicap_weight": {
+                    "type": "integer"
+                },
+                "handicap_weight_unit": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "integer"
+                },
+                "weight_unit": {
+                    "type": "string"
+                },
+                "competitor": {
+                    "$ref": "#/definitions/Competitor"
+                }
+            }
+        },
+        "Competitor": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "The internal reference for this specific competitor"
+                },
+                "name": {
                     "type": "string"
                 }
             }
